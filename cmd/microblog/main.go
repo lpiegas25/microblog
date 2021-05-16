@@ -1,10 +1,12 @@
 package main
 
 import (
-	"github.com/lpiegas25/microblog/internal/server"
 	"log"
 	"os"
 	"os/signal"
+
+	"github.com/lpiegas25/microblog/internal/data"
+	"github.com/lpiegas25/microblog/internal/server"
 
 	_ "github.com/joho/godotenv/autoload"
 )
@@ -16,7 +18,13 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// start the server.
+	// connection to the database.
+	d := data.New()
+	errDB := d.DB.Ping()
+	if errDB != nil {
+		log.Fatal(errDB)
+	}
+
 	go serv.Start()
 
 	// Wait for an in interrupt.
@@ -24,6 +32,12 @@ func main() {
 	signal.Notify(c, os.Interrupt)
 	<-c
 
-	// Attempt a graceful shutdown.
-	serv.Close()
+	errSrv := serv.Close()
+	if errSrv != nil {
+		log.Fatal(errSrv)
+	}
+	errDB = data.Close()
+	if errDB != nil {
+		log.Fatal(errDB)
+	}
 }
