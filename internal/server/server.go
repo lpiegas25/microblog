@@ -1,10 +1,12 @@
 package server
 
 import (
-	"github.com/go-chi/chi"
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/go-chi/chi"
+	v1 "github.com/lpiegas25/microblog/internal/server/v1"
 )
 
 // Server is a base server configuration.
@@ -15,6 +17,9 @@ type Server struct {
 // New inicialize a new server with configuration.
 func New(port string) (*Server, error) {
 	r := chi.NewRouter()
+
+	// API routes version 1.
+	r.Mount("/api/v1", v1.New())
 
 	serv := &http.Server{
 		Addr:         ":" + port,
